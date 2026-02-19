@@ -1,64 +1,35 @@
-# Mailbox Manager
+# Mailbox2
 
-一个现代化的邮箱管理系统，支持多邮箱账号管理、邮件同步、Web界面操作等功能。
+Mailbox Manager 2 - 邮箱管理系统
 
-## 功能特性
+## 特性
 
-- 📧 **多邮箱支持**：支持 Gmail、Outlook、Yahoo 等主流邮箱服务
-- 🔄 **邮件同步**：定时自动同步邮件到本地数据库
-- 🌐 **Web 界面**：现代化 Vue.js 前端界面
-- 🔐 **安全认证**：JWT 认证机制
-- 📊 **邮件管理**：查看、搜索、分类邮件
-
-## 技术栈
-
-- **后端**: Python + FastAPI + SQLAlchemy + SQLite
-- **前端**: Vue 3 + TypeScript + Element Plus
-- **部署**: Nginx + Systemd
+- 📧 多邮箱账户管理
+- 📥 批量导入账户
+- 🔒 OAuth2 认证支持
+- 📊 实时监控邮件
+- 🌐 Web 界面
 
 ## 快速开始
 
-### 后端启动
+查看 [DEPLOY.md](DEPLOY.md) 了解详细部署步骤。
 
-```bash
-cd backend
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# venv\Scripts\activate  # Windows
-pip install -r requirements.txt
-python main.py
-```
+## 默认账号
 
-### 前端启动
+- 用户名: 
+- 密码: 
 
-```bash
-cd frontend
-npm install
-npm run dev
-```
+**注意**: 首次登录后请立即修改默认密码。
 
-## 配置
+## 修复内容
 
-### 环境变量
+本版本修复了以下问题:
 
-创建 `.env` 文件：
-
-```env
-DATABASE_URL=sqlite:///./mailbox_v2.db
-SECRET_KEY=your-secret-key-here
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
-REFRESH_TOKEN_EXPIRE_DAYS=7
-DEBUG=false
-```
-
-## API 文档
-
-启动服务后访问 `http://localhost:8000/docs` 查看交互式 API 文档。
-
-## 部署
-
-参考 `DEPLOY.md` 获取详细的部署指南。
+1. ✅ 登录 API 支持 form-data 和 JSON 格式
+2. ✅ 修复批量导入 URL (从 localhost 改为相对路径)
+3. ✅ 修复 CORS 跨域配置
+4. ✅ 添加 Nginx 反向代理配置
+5. ✅ 添加 SSL 证书自动续期
 
 ## 许可证
 
