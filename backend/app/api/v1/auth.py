@@ -26,6 +26,12 @@ from app.api.deps import get_current_user  # 从 deps 引入
 router = APIRouter()
 
 # Schema 定义
+
+# JSON 登录支持的 Schema
+class JSONLoginSchema(BaseModel):
+    username: str
+    password: str
+
 class RegisterSchema(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
@@ -123,6 +129,57 @@ async def login(
     access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
     access_token = create_access_token(
         subject=user.email, # 注意：这里用 email 作为 subject，与 deps.py 对应
+        expires_delta=access_token_expires
+    )
+    refresh_token = create_refresh_token(subject=user.email)
+    
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+        "expires_in": settings.access_token_expire_minutes * 60,
+        "user": user.to_dict()
+    }
+
+
+
+@router.post("/login/json", summary="用户登录 (JSON 格式)")
+async def login_json(
+    payload: JSONLoginSchema = Body(...),
+    db: AsyncSession = Depends(get_db)
+):
+    """JSON 格式的登录接口"""
+    # 查找用户
+    result = await db.execute(
+        select(User).where(
+            (User.username == payload.username) | 
+            (User.email == payload.username)
+        )
+    )
+    user = result.scalar_one_or_none()
+    
+    # 验证密码
+    if not user or not verify_password(payload.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="用户名或密码错误",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="用户账号已被禁用"
+        )
+    
+    # 更新最后登录时间
+    user.last_login_at = datetime.utcnow()
+    await db.commit()
+    
+    # 创建令牌
+    access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
+    access_token = create_access_token(
+        subject=user.email,
         expires_delta=access_token_expires
     )
     refresh_token = create_refresh_token(subject=user.email)
